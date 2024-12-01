@@ -51,7 +51,7 @@ void dispatcher_cleanup(struct dispatcher *dispatcher)
 
 void dispatcher_flags(struct fd_handler *handler, short flags)
 {
-	handler->dispatcher->fds[handler->index].events = flags;
+	handler->dispatcher->handler[handler->index].events = flags;
 }
 
 struct fd_handler
@@ -75,6 +75,7 @@ dispatcher_watch(struct dispatcher *dispatcher, int fd,
 	pollfd->fd = fd;
 
 	struct poll_handler *handler = &dispatcher->handler[index];
+	handler->events = 0;
 	handler->handler = io_handler;
 	handler->aux = aux;
 
@@ -114,7 +115,7 @@ dispatch(struct poll_handler *handler, struct pollfd *pollfd)
 		return DISPATCH_ABORT;
 	}
 
-	return handler->handler(pollfd->fd, pollfd->events, handler->aux);
+	return handler->handler(pollfd->fd, pollfd->revents, handler->aux);
 }
 
 static enum dispatch_action
